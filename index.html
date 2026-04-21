@@ -684,11 +684,11 @@
         // 构建详细内容，模态框信息区通过伪元素已经有了暖色背景
         modalInfo.innerHTML = `
             <div class="modal-title">${escapeHtml(painting.title)}</div>
-            <div class="modal-year">📅 ${escapeHtml(painting.year)}</div>
+            <div class="modal-year">${escapeHtml(painting.year)}</div>
             <div class="modal-tags">
                 ${painting.labels.map(tag => `<span class="modal-tag">${escapeHtml(tag)}</span>`).join('')}
             </div>
-            <div class="modal-desc">📖 ${escapeHtml(painting.description || '暂无详细描述，但每一幅都是用心之作。')}</div>
+            <div class="modal-desc">${escapeHtml(painting.description || '暂无详细描述，但每一幅都是用心之作。')}</div>
         `;
     }
 
