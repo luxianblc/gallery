@@ -26,7 +26,7 @@
 
         .header {
             text-align: center;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
         }
 
         .header h1 {
@@ -40,12 +40,55 @@
             margin-bottom: 0.5rem;
         }
 
-        .sub {
-            color: #4a5b6b;
-            font-size: 1rem;
-            border-top: 1px solid #ddd6cf;
-            display: inline-block;
-            padding-top: 0.6rem;
+        /* 工具栏：排序 + 标签筛选栏合并区域 */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 0.8rem;
+        }
+
+        .sort-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: rgba(255,255,245,0.4);
+            backdrop-filter: blur(4px);
+            padding: 0.3rem 1rem;
+        }
+
+        .sort-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #2c3e4e;
+        }
+
+        .sort-btn {
+            background: rgba(30,30,35,0.65);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 0.3rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #f0f0f0;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: inherit;
+            border-radius: 0px;
+        }
+
+        .sort-btn.active {
+            background: #2c3e4e;
+            border-color: #ffffff;
+            color: white;
+        }
+
+        .sort-btn:hover {
+            background: rgba(50,50,60,0.8);
         }
 
         /* 标签筛选栏 - PNG背景 */
@@ -54,8 +97,7 @@
             flex-wrap: wrap;
             justify-content: center;
             gap: 0.8rem;
-            margin-bottom: 2.5rem;
-            padding-bottom: 0.5rem;
+            flex: 2;
         }
 
         .tag-btn {
@@ -65,9 +107,9 @@
             background-repeat: no-repeat;
             background-color: transparent;
             border: none;
-            padding: 0.6rem 1.5rem;
+            padding: 0.5rem 1.3rem;
             border-radius: 0px;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 600;
             color: #2c3e4e;
             cursor: pointer;
@@ -87,23 +129,22 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.4);
         }
 
-        /* ========= 瀑布流容器 (类似小红书错落排列) ========= */
+        /* ========= 瀑布流容器 ========= */
         .gallery {
-            column-count: 4;           /* 默认4列 */
+            column-count: 4;
             column-gap: 1.5rem;
             margin-bottom: 3rem;
         }
 
-        /* 卡片 - 避免内部元素断裂，错落高度自动适应 */
         .art-card {
-            break-inside: avoid;       /* 防止卡片被截断跨列 */
+            break-inside: avoid;
             margin-bottom: 1.5rem;
             background: rgba(255, 255, 245, 0.25);
             backdrop-filter: blur(3px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             transition: transform 0.25s ease, box-shadow 0.3s;
             cursor: pointer;
-            display: inline-block;     /* 配合瀑布流 */
+            display: inline-block;
             width: 100%;
             border-radius: 0px;
             overflow: hidden;
@@ -138,7 +179,7 @@
 
         /* 作品信息区 - PNG背景 */
         .art-info {
-            padding: 1rem 1rem 1.2rem;
+            padding: 0.9rem 1rem 1rem;
             background-image: url('images/card-bg.png');
             background-size: cover;
             background-position: center;
@@ -159,12 +200,19 @@
             z-index: -1;
         }
 
-        /* 只保留三个信息：时间、标签、介绍 */
         .art-year {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: #5e6e7e;
             margin-bottom: 0.3rem;
             letter-spacing: 0.3px;
+        }
+
+        /* 多标签容器 */
+        .multi-tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            margin-bottom: 0.5rem;
         }
 
         .art-label {
@@ -173,12 +221,11 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            padding: 0.2rem 0.8rem;
-            font-size: 0.7rem;
+            padding: 0.2rem 0.7rem;
+            font-size: 0.65rem;
             font-weight: 600;
             color: #2c3e4e;
             text-shadow: 0 1px 1px rgba(255,255,255,0.5);
-            margin-bottom: 0.5rem;
             border-radius: 0px;
         }
 
@@ -189,27 +236,7 @@
             line-height: 1.4;
         }
 
-        /* 无结果提示 */
-        .no-results {
-            text-align: center;
-            grid-column: 1 / -1;
-            padding: 3rem;
-            font-size: 1.1rem;
-            color: #8d9aa5;
-            background: rgba(245, 242, 237, 0.8);
-            border-radius: 0px;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 1rem;
-            padding: 1.5rem 0 0.5rem;
-            border-top: 1px solid #ddd6cf;
-            color: #7c8b9a;
-            font-size: 0.85rem;
-        }
-
-        /* 模态框 */
+        /* 模态框 - 展示图片 + 完整作品介绍 */
         .modal {
             display: none;
             position: fixed;
@@ -224,63 +251,122 @@
             cursor: pointer;
         }
 
-        .modal-content {
+        .modal-container {
+            background: rgba(30,30,35,0.9);
+            backdrop-filter: blur(12px);
             max-width: 90%;
-            max-height: 85%;
+            max-height: 90%;
+            width: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid rgba(255,255,200,0.3);
+            overflow: auto;
+            cursor: default;
+        }
+
+        .modal-content {
+            max-width: 100%;
+            max-height: 65vh;
             object-fit: contain;
-            border-radius: 0px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-            border: 2px solid rgba(255,255,240,0.5);
+            display: block;
+        }
+
+        .modal-info {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            background: rgba(0,0,0,0.6);
+            color: #f0f0f0;
+            border-top: 1px solid rgba(255,255,200,0.3);
+        }
+
+        .modal-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+
+        .modal-year {
+            font-size: 0.85rem;
+            opacity: 0.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .modal-tag {
+            background-image: url('images/btn-bg.png');
+            background-size: cover;
+            padding: 0.2rem 0.8rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #2c3e4e;
+            text-shadow: 0 1px 1px white;
+        }
+
+        .modal-desc {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            word-break: break-word;
         }
 
         .close-modal {
             position: absolute;
-            top: 25px;
-            right: 35px;
-            color: #f1f1f1;
+            top: 20px;
+            right: 30px;
+            color: white;
             font-size: 40px;
             font-weight: bold;
-            transition: 0.2s;
             cursor: pointer;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.5);
             width: 45px;
             height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 0px;
+            z-index: 1001;
         }
 
         .close-modal:hover {
-            color: #ccc;
             background: rgba(0,0,0,0.9);
         }
 
-        /* 响应式：屏幕变窄时减少列数 */
+        .no-results {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 3rem;
+            font-size: 1.1rem;
+            color: #8d9aa5;
+            background: rgba(245, 242, 237, 0.8);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 1rem;
+            padding: 1rem 0 0.5rem;
+            border-top: 1px solid #ddd6cf;
+            color: #7c8b9a;
+            font-size: 0.8rem;
+        }
+
         @media (max-width: 1200px) {
-            .gallery {
-                column-count: 3;
-            }
+            .gallery { column-count: 3; }
         }
         @media (max-width: 800px) {
-            .gallery {
-                column-count: 2;
-            }
+            .gallery { column-count: 2; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .sort-bar { justify-content: center; }
         }
         @media (max-width: 500px) {
-            .gallery {
-                column-count: 1;
-            }
-            body {
-                padding: 1rem;
-            }
-            .header h1 {
-                font-size: 2rem;
-            }
-            .tag-btn {
-                padding: 0.4rem 1.2rem;
-                font-size: 0.8rem;
-            }
+            .gallery { column-count: 1; }
+            body { padding: 1rem; }
+            .header h1 { font-size: 2rem; }
         }
     </style>
 </head>
@@ -288,35 +374,46 @@
 <div class="container">
     <div class="header">
         <h1>lu作品集</h1>
-        <div class="sub">时间 · 标签 · 介绍 | 瀑布流错落排版</div>
     </div>
 
-    <div class="tag-filter" id="tagFilterBar"></div>
+    <div class="toolbar">
+        <div class="sort-bar">
+            <span class="sort-label">排序</span>
+            <button class="sort-btn" data-sort="desc">倒序</button>
+            <button class="sort-btn" data-sort="asc">正序</button>
+        </div>
+        <div class="tag-filter" id="tagFilterBar"></div>
+    </div>
     
-    <!-- 瀑布流容器 -->
     <div class="gallery" id="galleryContainer">
-        <div class="loading-placeholder" style="text-align:center; padding:2rem; width:100%;">✨ 加载作品中... ✨</div>
+        <div class="loading-placeholder" style="text-align:center; padding:2rem;">✨ 加载作品中... ✨</div>
     </div>
     
     <div class="footer">
-        <p>© 个人作品集 · 图片已优化懒加载 | 瀑布流自然错落</p>
+        <p>© 个人作品集 · 多标签筛选 | 瀑布流错落 | 点击图片查看详情</p>
     </div>
 </div>
 
+<!-- 模态框：图片+完整介绍 -->
 <div id="imageModal" class="modal">
     <span class="close-modal">&times;</span>
-    <img class="modal-content" id="modalImage" alt="放大预览">
+    <div class="modal-container">
+        <img class="modal-content" id="modalImage" alt="放大预览">
+        <div class="modal-info" id="modalInfo">
+            <!-- 动态填入标题、年份、标签、介绍 -->
+        </div>
+    </div>
 </div>
 
 <script>
-    // ===================== 作品数据（可随意增删）=====================
-    // 提示：为了让图片加载更快，建议先用 TinyPNG / Squoosh 压缩图片，宽度控制在1200px以内。
+    // ===================== 作品数据（支持多标签，增加描述字段）=====================
     const paintingsData = [
         {
             id: 1,
             title: "庄",
             year: "2025.4.21",
-            label: "二创",
+            labels: ["二创", "水墨风"],    // 多标签
+            description: "以传统水墨笔触描绘的幻想角色，融合了现代二次元风格。",
             imageUrl: "images/0001.jpg",
             alt: "zmd"
         },
@@ -324,7 +421,8 @@
             id: 2,
             title: "4667",
             year: "2025.4.21",
-            label: "原创",
+            labels: ["原创", "赛博朋克"],
+            description: "未来都市中的机械少女，光影对比强烈。",
             imageUrl: "images/0002.png",
             alt: "899"
         },
@@ -332,7 +430,8 @@
             id: 3,
             title: "1999",
             year: "2025.4.21",
-            label: "二创",
+            labels: ["二创", "复古"],
+            description: "世纪末的回忆，暖色调营造怀旧氛围。",
             imageUrl: "images/0003.jpg",
             alt: "zmhjd"
         },
@@ -340,47 +439,89 @@
             id: 4,
             title: "结成里",
             year: "2025.4.18",
-            label: "二创",
+            labels: ["二创", "校园", "清新"],
+            description: "春日午后的少女，轻快的笔触记录日常。",
             imageUrl: "images/0004.jpg",
             alt: "summer night"
+        },
+        {
+            id: 5,
+            title: "星轨",
+            year: "2025.4.10",
+            labels: ["原创", "星空", "幻想"],
+            description: "仰望星空的魔法师，长曝光般的梦幻效果。",
+            imageUrl: "images/0005.jpg",
+            alt: "star trail"
         }
-        // 你可以继续添加更多，瀑布流会自动适应不同高度的图片
     ];
 
-    // 全局变量
+    // 全局状态
     let currentPaintings = [...paintingsData];
-    let activeFilter = "全部";
+    let activeFilter = "全部";       // 当前选中的标签筛选
+    let currentSort = "desc";        // 排序方向: 'desc' 倒序(新到旧) / 'asc' 正序(旧到新)
 
     const galleryContainer = document.getElementById('galleryContainer');
     const tagFilterBar = document.getElementById('tagFilterBar');
     const modal = document.getElementById('imageModal');
     const modalImg = document.getElementById('modalImage');
+    const modalInfo = document.getElementById('modalInfo');
     const closeModalSpan = document.querySelector('.close-modal');
 
-    // 提取所有不重复的标签（用于筛选栏）
-    function getAllLabels() {
+    // ----- 辅助函数：解析日期字符串 (yyyy.m.d 或 yyyy-mm-dd 均可)
+    function parseDate(dateStr) {
+        // 支持 2025.4.21 或 2025-4-21 格式
+        let parts = dateStr.includes('.') ? dateStr.split('.') : dateStr.split('-');
+        if (parts.length === 3) {
+            return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        }
+        return new Date(0);
+    }
+
+    // ----- 排序核心 (按时间)
+    function sortPaintings(list, order) {
+        const sorted = [...list];
+        sorted.sort((a, b) => {
+            const dateA = parseDate(a.year);
+            const dateB = parseDate(b.year);
+            if (order === 'desc') return dateB - dateA;   // 倒序: 新->旧
+            else return dateA - dateB;                   // 正序: 旧->新
+        });
+        return sorted;
+    }
+
+    // ----- 提取所有不重复的标签 (从 labels 数组中)
+    function getAllUniqueLabels() {
         const labelSet = new Set();
         labelSet.add("全部");
         paintingsData.forEach(painting => {
-            if (painting.label) {
-                labelSet.add(painting.label);
+            if (painting.labels && Array.isArray(painting.labels)) {
+                painting.labels.forEach(label => labelSet.add(label));
             }
         });
         return Array.from(labelSet);
     }
 
-    // 根据标签筛选作品
+    // 筛选作品 (基于标签，支持多标签匹配：作品只要包含该标签就算)
     function filterPaintingsByLabel(label) {
         if (label === "全部") {
             return [...paintingsData];
         } else {
-            return paintingsData.filter(p => p.label === label);
+            return paintingsData.filter(painting => 
+                painting.labels && painting.labels.includes(label)
+            );
         }
     }
 
-    // 渲染筛选按钮
+    // 刷新数据：先筛选，再排序
+    function refreshData() {
+        let filtered = filterPaintingsByLabel(activeFilter);
+        currentPaintings = sortPaintings(filtered, currentSort);
+        renderGallery(currentPaintings);
+    }
+
+    // ----- 渲染筛选按钮 (多标签)
     function renderTagButtons() {
-        const allLabels = getAllLabels();
+        const allLabels = getAllUniqueLabels();
         tagFilterBar.innerHTML = '';
         allLabels.forEach(label => {
             const btn = document.createElement('button');
@@ -391,21 +532,18 @@
             }
             btn.addEventListener('click', () => {
                 activeFilter = label;
-                currentPaintings = filterPaintingsByLabel(activeFilter);
-                renderGallery(currentPaintings);
+                refreshData();
+                // 更新按钮高亮
                 document.querySelectorAll('.tag-btn').forEach(btnEl => {
-                    if (btnEl.textContent === activeFilter) {
-                        btnEl.classList.add('active');
-                    } else {
-                        btnEl.classList.remove('active');
-                    }
+                    if (btnEl.textContent === activeFilter) btnEl.classList.add('active');
+                    else btnEl.classList.remove('active');
                 });
             });
             tagFilterBar.appendChild(btn);
         });
     }
 
-    // 渲染瀑布流作品网格 (错落排列)
+    // 渲染瀑布流卡片 (支持多标签展示)
     function renderGallery(paintingsArray) {
         if (!galleryContainer) return;
         galleryContainer.innerHTML = '';
@@ -418,7 +556,6 @@
             return;
         }
 
-        // 使用文档片段提升性能
         const fragment = document.createDocumentFragment();
         
         paintingsArray.forEach(painting => {
@@ -432,15 +569,13 @@
             img.src = painting.imageUrl;
             img.alt = painting.alt || painting.title;
             img.className = 'art-image';
-            // 懒加载 + 解码优化
             img.loading = 'lazy';
             img.decoding = 'async';
 
+            // 点击图片打开模态框（展示完整介绍）
             img.addEventListener('click', (e) => {
                 e.stopPropagation();
-                modal.style.display = 'flex';
-                modalImg.src = painting.imageUrl;
-                modalImg.alt = painting.title;
+                openModal(painting);
             });
 
             imgWrapper.appendChild(img);
@@ -453,18 +588,40 @@
             yearEl.className = 'art-year';
             yearEl.textContent = painting.year;
 
-            // 标签名称（使用与按钮相同的PNG背景）
-            const labelEl = document.createElement('div');
-            labelEl.className = 'art-label';
-            labelEl.textContent = painting.label;
+            // 多标签区域
+            const tagContainer = document.createElement('div');
+            tagContainer.className = 'multi-tag-list';
+            if (painting.labels && painting.labels.length) {
+                painting.labels.forEach(label => {
+                    const tagSpan = document.createElement('span');
+                    tagSpan.className = 'art-label';
+                    tagSpan.textContent = label;
+                    // 点击小标签快速筛选
+                    tagSpan.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // 触发对应标签按钮的点击
+                        const targetBtn = Array.from(document.querySelectorAll('.tag-btn')).find(btn => btn.textContent === label);
+                        if (targetBtn) {
+                            targetBtn.click();
+                        } else {
+                            activeFilter = label;
+                            refreshData();
+                            document.querySelectorAll('.tag-btn').forEach(btn => {
+                                if (btn.textContent === activeFilter) btn.classList.add('active');
+                                else btn.classList.remove('active');
+                            });
+                        }
+                    });
+                    tagContainer.appendChild(tagSpan);
+                });
+            }
 
-            // 介绍
             const titleEl = document.createElement('div');
             titleEl.className = 'art-title';
             titleEl.textContent = painting.title;
 
             infoDiv.appendChild(yearEl);
-            infoDiv.appendChild(labelEl);
+            infoDiv.appendChild(tagContainer);
             infoDiv.appendChild(titleEl);
             card.appendChild(imgWrapper);
             card.appendChild(infoDiv);
@@ -474,48 +631,98 @@
         galleryContainer.appendChild(fragment);
     }
 
-    // 模态框关闭
+    // ----- 模态框：展示高清图 + 完整介绍文字 -----
+    function openModal(painting) {
+        modal.style.display = 'flex';
+        modalImg.src = painting.imageUrl;
+        modalImg.alt = painting.title;
+
+        // 构建详细内容
+        modalInfo.innerHTML = `
+            <div class="modal-title">${escapeHtml(painting.title)}</div>
+            <div class="modal-year">📅 ${escapeHtml(painting.year)}</div>
+            <div class="modal-tags">
+                ${painting.labels.map(tag => `<span class="modal-tag">${escapeHtml(tag)}</span>`).join('')}
+            </div>
+            <div class="modal-desc">📖 ${escapeHtml(painting.description || '暂无详细描述，但每一幅都是用心之作。')}</div>
+        `;
+    }
+
+    // 简单的防XSS
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        }).replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c;
+        });
+    }
+
+    // 排序按钮交互 + 更新排序并刷新
+    function initSortButtons() {
+        const descBtn = document.querySelector('.sort-btn[data-sort="desc"]');
+        const ascBtn = document.querySelector('.sort-btn[data-sort="asc"]');
+        
+        // 设置初始激活样式
+        if (currentSort === 'desc') descBtn.classList.add('active');
+        else ascBtn.classList.add('active');
+        
+        descBtn.addEventListener('click', () => {
+            if (currentSort === 'desc') return;
+            currentSort = 'desc';
+            descBtn.classList.add('active');
+            ascBtn.classList.remove('active');
+            refreshData();
+        });
+        
+        ascBtn.addEventListener('click', () => {
+            if (currentSort === 'asc') return;
+            currentSort = 'asc';
+            ascBtn.classList.add('active');
+            descBtn.classList.remove('active');
+            refreshData();
+        });
+    }
+
+    // 模态框关闭事件
     function initModal() {
         closeModalSpan.onclick = () => modal.style.display = "none";
-        modal.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
+        modal.onclick = (e) => {
+            if (e.target === modal) modal.style.display = "none";
+        };
         document.addEventListener('keydown', (e) => {
             if (e.key === "Escape" && modal.style.display === "flex") modal.style.display = "none";
         });
     }
 
+    // 初始化
     function init() {
         activeFilter = "全部";
-        currentPaintings = filterPaintingsByLabel(activeFilter);
+        currentSort = "desc";     // 默认倒序（最新作品在前）
         renderTagButtons();
+        // 初次渲染数据（筛选+排序）
+        let filtered = filterPaintingsByLabel(activeFilter);
+        currentPaintings = sortPaintings(filtered, currentSort);
         renderGallery(currentPaintings);
+        initSortButtons();
         initModal();
     }
 
     init();
 </script>
 
-<!-- 使用说明（优化加载速度 + 瀑布流）：
+<!-- 功能实现说明：
+     1. 多标签支持：每个作品拥有 labels 数组（可包含多个标签），筛选栏自动聚合所有标签。
+     2. 点击作品图片 → 模态框内显示高清大图 + 完整信息（标题、年份、全部标签、详细描述）。
+     3. 头部简化：只保留主标题“lu作品集”，副标题/时间标签介绍行已砍掉。
+     4. 排序功能：新增工具栏，支持“倒序(新到旧)”和“正序(旧到新)”，默认倒序。
+     5. 图片懒加载、瀑布流错落、直角风格、背景透明等特性保留。
      
-     【图片加载更快的方法】
-     1. 强烈推荐在上传前压缩图片：
-        - 使用 TinyPNG (tinypng.com) 或 Squoosh (squoosh.app)
-        - 把图片宽度统一调整为 1000px ~ 1500px 之间（不需要原图几千像素）
-        - 保存为 JPG 格式（质量 70-85%）或 WebP 格式体积更小
-     2. 本代码已添加 loading="lazy" (懒加载) + decoding="async" (异步解码)
-     3. 图片放到 images/ 文件夹后，文件名保持与代码中一致
-
-     【瀑布流错落排列】
-     - 采用 CSS 多列布局 (column-count)，图片根据自身高度自然排列，类似小红书/Pinterest
-     - 不同高度的图片会错落有致，不再强制等高
-     - 响应式：屏幕越大列数越多（4列→3列→2列→1列）
-
-     需要准备的图片素材：
-     - images/btn-bg.png          (普通按钮背景)
-     - images/btn-bg-active.png   (激活按钮背景)
-     - images/card-bg.png         (卡片信息区背景)
-     - images/0001.jpg ...        (你的绘画作品)
-
-     如果觉得初始加载还是慢，可以给 body 设置背景图，同时图片压缩是关键。
+     所需素材：images/btn-bg.png / btn-bg-active.png / card-bg.png 以及作品图片 0001.jpg 等。
+     如需修改描述或增加作品，按 paintingsData 格式添加即可。
 -->
 </body>
 </html>
