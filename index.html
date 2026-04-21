@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>lu作品集</title>
+    <title>lu作品集 · 瀑布流</title>
     <style>
         * {
             margin: 0;
@@ -20,7 +20,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
         }
 
@@ -87,25 +87,26 @@
             text-shadow: 0 1px 2px rgba(0,0,0,0.4);
         }
 
-        /* 作品网格 */
+        /* ========= 瀑布流容器 (类似小红书错落排列) ========= */
         .gallery {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem 1.8rem;
+            column-count: 4;           /* 默认4列 */
+            column-gap: 1.5rem;
             margin-bottom: 3rem;
         }
 
-        /* 卡片样式 */
+        /* 卡片 - 避免内部元素断裂，错落高度自动适应 */
         .art-card {
+            break-inside: avoid;       /* 防止卡片被截断跨列 */
+            margin-bottom: 1.5rem;
             background: rgba(255, 255, 245, 0.25);
             backdrop-filter: blur(3px);
-            overflow: hidden;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             transition: transform 0.25s ease, box-shadow 0.3s;
             cursor: pointer;
-            display: flex;
-            flex-direction: column;
+            display: inline-block;     /* 配合瀑布流 */
+            width: 100%;
             border-radius: 0px;
+            overflow: hidden;
         }
 
         .art-card:hover {
@@ -137,7 +138,7 @@
 
         /* 作品信息区 - PNG背景 */
         .art-info {
-            padding: 1.2rem 1rem 1.3rem;
+            padding: 1rem 1rem 1.2rem;
             background-image: url('images/card-bg.png');
             background-size: cover;
             background-position: center;
@@ -160,9 +161,9 @@
 
         /* 只保留三个信息：时间、标签、介绍 */
         .art-year {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #5e6e7e;
-            margin-bottom: 0.4rem;
+            margin-bottom: 0.3rem;
             letter-spacing: 0.3px;
         }
 
@@ -173,16 +174,16 @@
             background-position: center;
             background-repeat: no-repeat;
             padding: 0.2rem 0.8rem;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             color: #2c3e4e;
             text-shadow: 0 1px 1px rgba(255,255,255,0.5);
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.5rem;
             border-radius: 0px;
         }
 
         .art-title {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
             color: #1f2e3a;
             line-height: 1.4;
@@ -201,7 +202,7 @@
 
         .footer {
             text-align: center;
-            margin-top: 2rem;
+            margin-top: 1rem;
             padding: 1.5rem 0 0.5rem;
             border-top: 1px solid #ddd6cf;
             color: #7c8b9a;
@@ -255,13 +256,23 @@
             background: rgba(0,0,0,0.9);
         }
 
-        @media (max-width: 640px) {
+        /* 响应式：屏幕变窄时减少列数 */
+        @media (max-width: 1200px) {
+            .gallery {
+                column-count: 3;
+            }
+        }
+        @media (max-width: 800px) {
+            .gallery {
+                column-count: 2;
+            }
+        }
+        @media (max-width: 500px) {
+            .gallery {
+                column-count: 1;
+            }
             body {
                 padding: 1rem;
-            }
-            .gallery {
-                gap: 1.2rem;
-                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
             }
             .header h1 {
                 font-size: 2rem;
@@ -277,15 +288,18 @@
 <div class="container">
     <div class="header">
         <h1>lu作品集</h1>
-        <div class="sub">时间 · 标签 · 介绍</div>
+        <div class="sub">时间 · 标签 · 介绍 | 瀑布流错落排版</div>
     </div>
 
     <div class="tag-filter" id="tagFilterBar"></div>
+    
+    <!-- 瀑布流容器 -->
     <div class="gallery" id="galleryContainer">
-        <div class="loading-placeholder" style="grid-column:1/-1; text-align:center; padding:2rem;">✨ 加载作品中... ✨</div>
+        <div class="loading-placeholder" style="text-align:center; padding:2rem; width:100%;">✨ 加载作品中... ✨</div>
     </div>
+    
     <div class="footer">
-        <p>© 个人作品集 · 图片托管于 GitHub</p>
+        <p>© 个人作品集 · 图片已优化懒加载 | 瀑布流自然错落</p>
     </div>
 </div>
 
@@ -295,51 +309,58 @@
 </div>
 
 <script>
-    // ===================== 作品数据（简化版）=====================
-    // 每个作品只有三个核心信息：year(时间), label(标签名称), title(介绍)
-    // 您可以根据需要增加更多作品
+    // ===================== 作品数据（可随意增删）=====================
+    // 提示：为了让图片加载更快，建议先用 TinyPNG / Squoosh 压缩图片，宽度控制在1200px以内。
     const paintingsData = [
         {
             id: 1,
-            title: "庄",              // 介绍
-            year: "2025.4.21",         // 时间
-            label: "二创",             // 标签名称（用于筛选和显示）
+            title: "庄",
+            year: "2025.4.21",
+            label: "二创",
             imageUrl: "images/0001.jpg",
             alt: "zmd"
         },
         {
             id: 2,
-            title: "4667",              // 介绍
-            year: "2025.4.21",         // 时间
-            label: "原创",             // 标签名称（用于筛选和显示）
-            imageUrl: "images/0002.png",
+            title: "4667",
+            year: "2025.4.21",
+            label: "原创",
+            imageUrl: "images/0002.jpg",
             alt: "899"
         },
         {
             id: 3,
-            title: "1999",              // 介绍
-            year: "2025.4.21",         // 时间
-            label: "二创",             // 标签名称（用于筛选和显示）
+            title: "1999",
+            year: "2025.4.21",
+            label: "二创",
             imageUrl: "images/0003.jpg",
             alt: "zmhjd"
         },
-        // 添加更多作品示例：
-        // {
-        //     id: 2,
-        //     title: "夏日回忆",
-        //     year: "2025.3.15",
-        //     label: "原创",
-        //     imageUrl: "images/0002.jpg",
-        //     alt: "夏日回忆"
-        // },
-        // {
-        //     id: 3,
-        //     title: "幻想角色",
-        //     year: "2025.2.10",
-        //     label: "角色",
-        //     imageUrl: "images/0003.jpg",
-        //     alt: "幻想角色"
-        // }
+        {
+            id: 4,
+            title: "夏夜幻想",
+            year: "2025.4.18",
+            label: "原创",
+            imageUrl: "images/0004.jpg",
+            alt: "summer night"
+        },
+        {
+            id: 5,
+            title: "城市倒影",
+            year: "2025.4.15",
+            label: "二创",
+            imageUrl: "images/0005.jpg",
+            alt: "city"
+        },
+        {
+            id: 6,
+            title: "花与少女",
+            year: "2025.4.10",
+            label: "原创",
+            imageUrl: "images/0006.jpg",
+            alt: "flower"
+        }
+        // 你可以继续添加更多，瀑布流会自动适应不同高度的图片
     ];
 
     // 全局变量
@@ -400,7 +421,7 @@
         });
     }
 
-    // 渲染作品网格
+    // 渲染瀑布流作品网格 (错落排列)
     function renderGallery(paintingsArray) {
         if (!galleryContainer) return;
         galleryContainer.innerHTML = '';
@@ -413,6 +434,9 @@
             return;
         }
 
+        // 使用文档片段提升性能
+        const fragment = document.createDocumentFragment();
+        
         paintingsArray.forEach(painting => {
             const card = document.createElement('div');
             card.className = 'art-card';
@@ -424,7 +448,9 @@
             img.src = painting.imageUrl;
             img.alt = painting.alt || painting.title;
             img.className = 'art-image';
+            // 懒加载 + 解码优化
             img.loading = 'lazy';
+            img.decoding = 'async';
 
             img.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -458,8 +484,10 @@
             infoDiv.appendChild(titleEl);
             card.appendChild(imgWrapper);
             card.appendChild(infoDiv);
-            galleryContainer.appendChild(card);
+            fragment.appendChild(card);
         });
+        
+        galleryContainer.appendChild(fragment);
     }
 
     // 模态框关闭
@@ -482,11 +510,28 @@
     init();
 </script>
 
-<!-- 使用说明：
-     1. 准备图片：将 btn-bg.png、btn-bg-active.png、card-bg.png 放入 images/ 文件夹
-     2. 作品图片：放入 images/ 文件夹，修改 paintingsData 中的 imageUrl
-     3. 每个作品只需填写：title（介绍）、year（时间）、label（标签名称）
-     4. 筛选栏自动从所有 label 中生成，点击可筛选
+<!-- 使用说明（优化加载速度 + 瀑布流）：
+     
+     【图片加载更快的方法】
+     1. 强烈推荐在上传前压缩图片：
+        - 使用 TinyPNG (tinypng.com) 或 Squoosh (squoosh.app)
+        - 把图片宽度统一调整为 1000px ~ 1500px 之间（不需要原图几千像素）
+        - 保存为 JPG 格式（质量 70-85%）或 WebP 格式体积更小
+     2. 本代码已添加 loading="lazy" (懒加载) + decoding="async" (异步解码)
+     3. 图片放到 images/ 文件夹后，文件名保持与代码中一致
+
+     【瀑布流错落排列】
+     - 采用 CSS 多列布局 (column-count)，图片根据自身高度自然排列，类似小红书/Pinterest
+     - 不同高度的图片会错落有致，不再强制等高
+     - 响应式：屏幕越大列数越多（4列→3列→2列→1列）
+
+     需要准备的图片素材：
+     - images/btn-bg.png          (普通按钮背景)
+     - images/btn-bg-active.png   (激活按钮背景)
+     - images/card-bg.png         (卡片信息区背景)
+     - images/0001.jpg ...        (你的绘画作品)
+
+     如果觉得初始加载还是慢，可以给 body 设置背景图，同时图片压缩是关键。
 -->
 </body>
 </html>
