@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -67,28 +68,33 @@
             color: #2c3e4e;
         }
 
+        /* 排序按钮复用标签背景 PNG */
         .sort-btn {
-            background: rgba(30,30,35,0.65);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(255,255,255,0.3);
+            background-image: url('images/btn-bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: transparent;
+            border: none;
             padding: 0.3rem 1rem;
             font-size: 0.8rem;
             font-weight: 600;
-            color: #f0f0f0;
+            color: #2c3e4e;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s, filter 0.2s;
             font-family: inherit;
-            border-radius: 0px;
-        }
-
-        .sort-btn.active {
-            background: #2c3e4e;
-            border-color: #ffffff;
-            color: white;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.6);
         }
 
         .sort-btn:hover {
-            background: rgba(50,50,60,0.8);
+            transform: translateY(-2px);
+            filter: brightness(0.96);
+        }
+
+        .sort-btn.active {
+            background-image: url('images/btn-bg-active.png');
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
         }
 
         /* 标签筛选栏 - PNG背景 */
@@ -236,7 +242,7 @@
             line-height: 1.4;
         }
 
-        /* 模态框 - 展示图片 + 完整作品介绍 */
+        /* 模态框 - 展示图片 + 完整作品介绍（增加颜色背景） */
         .modal {
             display: none;
             position: fixed;
@@ -272,24 +278,45 @@
             display: block;
         }
 
+        /* 信息区域增加颜色背景 + 原卡片背景图叠加 */
         .modal-info {
             width: 100%;
             padding: 1rem 1.5rem;
-            background: rgba(0,0,0,0.6);
-            color: #f0f0f0;
+            background-image: url('images/card-bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+            z-index: 1;
+            color: #1e1e1e;
             border-top: 1px solid rgba(255,255,200,0.3);
+        }
+
+        /* 增加半透颜色层，使背景更有色彩感同时保证文字清晰 */
+        .modal-info::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(210, 180, 140, 0.85);  /* 暖褐色颜色背景，可自行更换色调 */
+            z-index: -1;
         }
 
         .modal-title {
             font-size: 1.4rem;
             font-weight: bold;
             margin-bottom: 0.3rem;
+            color: #2c1e12;
+            text-shadow: 0 1px 1px rgba(255,255,200,0.5);
         }
 
         .modal-year {
             font-size: 0.85rem;
-            opacity: 0.8;
+            opacity: 0.9;
             margin-bottom: 0.5rem;
+            color: #3a2a1a;
         }
 
         .modal-tags {
@@ -302,17 +329,20 @@
         .modal-tag {
             background-image: url('images/btn-bg.png');
             background-size: cover;
+            background-position: center;
             padding: 0.2rem 0.8rem;
             font-size: 0.7rem;
             font-weight: 600;
             color: #2c3e4e;
-            text-shadow: 0 1px 1px white;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.5);
         }
 
         .modal-desc {
             font-size: 0.9rem;
             line-height: 1.5;
             word-break: break-word;
+            color: #2c2418;
+            font-weight: 500;
         }
 
         .close-modal {
@@ -394,7 +424,7 @@
     </div>
 </div>
 
-<!-- 模态框：图片+完整介绍 -->
+<!-- 模态框：图片+完整介绍（信息区增加颜色背景） -->
 <div id="imageModal" class="modal">
     <span class="close-modal">&times;</span>
     <div class="modal-container">
@@ -407,12 +437,13 @@
 
 <script>
     // ===================== 作品数据（支持多标签，增加描述字段）=====================
+    // 排序规则：基于 id 序号（正序：id 从小到大，倒序：id 从大到小）
     const paintingsData = [
         {
             id: 1,
             title: "庄",
             year: "2025.4.21",
-            labels: ["二创", "水墨风"],    // 多标签
+            labels: ["二创", "水墨风"],
             description: "以传统水墨笔触描绘的幻想角色，融合了现代二次元风格。",
             imageUrl: "images/0001.jpg",
             alt: "zmd"
@@ -458,7 +489,7 @@
     // 全局状态
     let currentPaintings = [...paintingsData];
     let activeFilter = "全部";       // 当前选中的标签筛选
-    let currentSort = "desc";        // 排序方向: 'desc' 倒序(新到旧) / 'asc' 正序(旧到新)
+    let currentSort = "desc";        // 排序方向: 'desc' 倒序(id从大到小) / 'asc' 正序(id从小到大)
 
     const galleryContainer = document.getElementById('galleryContainer');
     const tagFilterBar = document.getElementById('tagFilterBar');
@@ -467,29 +498,17 @@
     const modalInfo = document.getElementById('modalInfo');
     const closeModalSpan = document.querySelector('.close-modal');
 
-    // ----- 辅助函数：解析日期字符串 (yyyy.m.d 或 yyyy-mm-dd 均可)
-    function parseDate(dateStr) {
-        // 支持 2025.4.21 或 2025-4-21 格式
-        let parts = dateStr.includes('.') ? dateStr.split('.') : dateStr.split('-');
-        if (parts.length === 3) {
-            return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
-        }
-        return new Date(0);
-    }
-
-    // ----- 排序核心 (按时间)
-    function sortPaintings(list, order) {
+    // ----- 排序核心：按序号 (id) 排序 -----
+    function sortPaintingsById(list, order) {
         const sorted = [...list];
         sorted.sort((a, b) => {
-            const dateA = parseDate(a.year);
-            const dateB = parseDate(b.year);
-            if (order === 'desc') return dateB - dateA;   // 倒序: 新->旧
-            else return dateA - dateB;                   // 正序: 旧->新
+            if (order === 'desc') return b.id - a.id;   // 倒序: id 从大到小
+            else return a.id - b.id;                   // 正序: id 从小到大
         });
         return sorted;
     }
 
-    // ----- 提取所有不重复的标签 (从 labels 数组中)
+    // ----- 提取所有不重复的标签 (从 labels 数组中) -----
     function getAllUniqueLabels() {
         const labelSet = new Set();
         labelSet.add("全部");
@@ -501,7 +520,7 @@
         return Array.from(labelSet);
     }
 
-    // 筛选作品 (基于标签，支持多标签匹配：作品只要包含该标签就算)
+    // 筛选作品 (基于标签，作品只要包含该标签就算)
     function filterPaintingsByLabel(label) {
         if (label === "全部") {
             return [...paintingsData];
@@ -512,14 +531,14 @@
         }
     }
 
-    // 刷新数据：先筛选，再排序
+    // 刷新数据：先筛选，再按序号排序
     function refreshData() {
         let filtered = filterPaintingsByLabel(activeFilter);
-        currentPaintings = sortPaintings(filtered, currentSort);
+        currentPaintings = sortPaintingsById(filtered, currentSort);
         renderGallery(currentPaintings);
     }
 
-    // ----- 渲染筛选按钮 (多标签)
+    // ----- 渲染筛选按钮 (多标签) -----
     function renderTagButtons() {
         const allLabels = getAllUniqueLabels();
         tagFilterBar.innerHTML = '';
@@ -599,7 +618,6 @@
                     // 点击小标签快速筛选
                     tagSpan.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        // 触发对应标签按钮的点击
                         const targetBtn = Array.from(document.querySelectorAll('.tag-btn')).find(btn => btn.textContent === label);
                         if (targetBtn) {
                             targetBtn.click();
@@ -631,13 +649,13 @@
         galleryContainer.appendChild(fragment);
     }
 
-    // ----- 模态框：展示高清图 + 完整介绍文字 -----
+    // ----- 模态框：展示高清图 + 完整介绍文字 (信息区已增加颜色背景层)-----
     function openModal(painting) {
         modal.style.display = 'flex';
         modalImg.src = painting.imageUrl;
         modalImg.alt = painting.title;
 
-        // 构建详细内容
+        // 构建详细内容，模态框信息区通过伪元素已经有了暖色背景
         modalInfo.innerHTML = `
             <div class="modal-title">${escapeHtml(painting.title)}</div>
             <div class="modal-year">📅 ${escapeHtml(painting.year)}</div>
@@ -661,12 +679,12 @@
         });
     }
 
-    // 排序按钮交互 + 更新排序并刷新
+    // 排序按钮交互 + 基于序号更新排序并刷新
     function initSortButtons() {
         const descBtn = document.querySelector('.sort-btn[data-sort="desc"]');
         const ascBtn = document.querySelector('.sort-btn[data-sort="asc"]');
         
-        // 设置初始激活样式
+        // 设置初始激活样式（默认倒序）
         if (currentSort === 'desc') descBtn.classList.add('active');
         else ascBtn.classList.add('active');
         
@@ -701,11 +719,11 @@
     // 初始化
     function init() {
         activeFilter = "全部";
-        currentSort = "desc";     // 默认倒序（最新作品在前）
+        currentSort = "desc";     // 默认倒序（按 id 从大到小，即新作品序号大在前）
         renderTagButtons();
-        // 初次渲染数据（筛选+排序）
+        // 初次渲染数据（筛选+按id排序）
         let filtered = filterPaintingsByLabel(activeFilter);
-        currentPaintings = sortPaintings(filtered, currentSort);
+        currentPaintings = sortPaintingsById(filtered, currentSort);
         renderGallery(currentPaintings);
         initSortButtons();
         initModal();
@@ -715,14 +733,12 @@
 </script>
 
 <!-- 功能实现说明：
-     1. 多标签支持：每个作品拥有 labels 数组（可包含多个标签），筛选栏自动聚合所有标签。
-     2. 点击作品图片 → 模态框内显示高清大图 + 完整信息（标题、年份、全部标签、详细描述）。
-     3. 头部简化：只保留主标题“lu作品集”，副标题/时间标签介绍行已砍掉。
-     4. 排序功能：新增工具栏，支持“倒序(新到旧)”和“正序(旧到新)”，默认倒序。
-     5. 图片懒加载、瀑布流错落、直角风格、背景透明等特性保留。
-     
+     1. 排序规则：按照作品的 id 序号进行正序(从小到大) / 倒序(从大到小)排列，默认倒序（最新添加的作品序号大优先显示）。
+     2. 排序按钮背景复用标签按钮的 PNG 图片（btn-bg.png / btn-bg-active.png），视觉风格统一。
+     3. 点击图片后模态框内信息区增加了暖褐色半透明颜色背景（通过 .modal-info::before 实现），同时保留 card-bg.png 纹理，文字清晰且具有质感。
+     4. 多标签支持、瀑布流错落、头部简化、图片懒加载等功能均保留。
      所需素材：images/btn-bg.png / btn-bg-active.png / card-bg.png 以及作品图片 0001.jpg 等。
-     如需修改描述或增加作品，按 paintingsData 格式添加即可。
 -->
 </body>
 </html>
+```
