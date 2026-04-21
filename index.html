@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>绘画个人作品集 | 动态画廊</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+            background: #faf9f8;
+            color: #1e1e1e;
+            line-height: 1.5;
+            padding: 2rem 1.5rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* 头部区域 */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #2c3e4e, #1a2a36);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .sub {
+            color: #5a6874;
+            font-size: 1.1rem;
+            border-top: 1px solid #e0dcd8;
+            display: inline-block;
+            padding-top: 0.8rem;
+        }
+
+        /* 标签筛选栏 */
+        .tag-filter {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 2.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2dfdb;
+        }
+
+        .tag-btn {
+            background: transparent;
+            border: 1px solid #cbc6c0;
+            padding: 0.5rem 1.3rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #3a4a5a;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .tag-btn:hover {
+            background: #e8e4df;
+            border-color: #b0a89f;
+        }
+
+        .tag-btn.active {
+            background: #2c3e4e;
+            border-color: #2c3e4e;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        /* 作品网格 — 动态调整大小 (响应式 + 弹性网格) */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem 1.8rem;
+            margin-bottom: 3rem;
+        }
+
+        /* 绘画卡片 */
+        .art-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            transition: transform 0.25s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .art-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 图片容器 — 保证不同比例图片都能整齐显示且高度动态适应 */
+        .image-wrapper {
+            position: relative;
+            background: #f1efec;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .art-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.4s ease;
+            object-fit: cover;
+            /* 保证图片比例自然，不强制固定高度，由内容撑开 */
+        }
+
+        .art-card:hover .art-image {
+            transform: scale(1.02);
+        }
+
+        /* 绘画信息区 */
+        .art-info {
+            padding: 1.2rem 1rem 1.3rem;
+            border-top: 1px solid #f0ede9;
+        }
+
+        .art-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+            color: #1f2e3a;
+        }
+
+        .art-meta {
+            font-size: 0.8rem;
+            color: #7b8a96;
+            margin-bottom: 0.65rem;
+            letter-spacing: 0.3px;
+        }
+
+        /* 标签组 (小标签) */
+        .tag-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.45rem;
+            margin-top: 0.5rem;
+        }
+
+        .painting-tag {
+            background: #f0efed;
+            padding: 0.2rem 0.7rem;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #4c5c6b;
+            transition: background 0.1s;
+        }
+
+        /* 无作品提示 */
+        .no-results {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 3rem;
+            font-size: 1.1rem;
+            color: #8d9aa5;
+            background: #f7f5f2;
+            border-radius: 40px;
+        }
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1.8rem 0 0.5rem;
+            border-top: 1px solid #e2dfdb;
+            color: #8d9aa5;
+            font-size: 0.85rem;
+        }
+
+        /* 模态框 (点击图片放大) */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 85%;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 25px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.2s;
+            cursor: pointer;
+            background: rgba(0,0,0,0.5);
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-modal:hover {
+            color: #bbb;
+            background: rgba(0,0,0,0.8);
+        }
+
+        /* 响应式微调: 小屏幕网格稍紧凑 */
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+            .gallery {
+                gap: 1.2rem;
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .tag-btn {
+                padding: 0.4rem 1rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* 加载占位简单效果 */
+        .loading-placeholder {
+            text-align: center;
+            grid-column: 1 / -1;
+            padding: 2rem;
+            font-style: italic;
+            color: #a5b2bc;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🎨 纸上微光 · 绘画手稿</h1>
+        <div class="sub">个人绘画作品集 | 点击图片查看细节</div>
+    </div>
+
+    <!-- 动态标签栏会由js生成 -->
+    <div class="tag-filter" id="tagFilterBar">
+        <!-- 这里将会动态插入所有标签按钮 -->
+    </div>
+
+    <!-- 作品网格 -->
+    <div class="gallery" id="galleryContainer">
+        <div class="loading-placeholder">加载作品中...</div>
+    </div>
+
+    <div class="footer">
+        <p>© 个人绘画集 · 所有作品均为原作 | 图片托管于 GitHub Pages</p>
+    </div>
+</div>
+
+<!-- 模态框 放大图片 -->
+<div id="imageModal" class="modal">
+    <span class="close-modal">&times;</span>
+    <img class="modal-content" id="modalImage" alt="放大绘画作品">
+</div>
+
+<script>
+    /**
+     * 绘画作品数据 —— 完全可配置
+     * 图片建议放在仓库的 images/ 目录下，或者使用 github raw 链接，这里以相对路径为例。
+     * 注意：你可以任意添加作品、修改标签、标题等。
+     * 图片尺寸会自动适应，卡片大小动态调整。
+     */
+    const paintingsData = [
+        {
+            id: 1,
+            title: "暮色山谷",
+            year: "2024",
+            medium: "布面油画 | 50×60cm",
+            tags: ["风景", "油画", "自然"],
+            imageUrl: "https://picsum.photos/id/104/600/750",   // 示例图片 (风景类)
+            alt: "暮色中的山谷"
+        },
+        {
+            id: 2,
+            title: "旧巷晨光",
+            year: "2023",
+            medium: "水彩 | 38×56cm",
+            tags: ["街景", "水彩", "城市"],
+            imageUrl: "https://picsum.photos/id/15/600/750",
+            alt: "老街水彩"
+        },
+        {
+            id: 3,
+            title: "静物·石榴与陶罐",
+            year: "2024",
+            medium: "布面油画 | 40×50cm",
+            tags: ["静物", "油画", "传统"],
+            imageUrl: "https://picsum.photos/id/127/600/750",
+            alt: "静物油画"
+        },
+        {
+            id: 4,
+            title: "林中鹿影",
+            year: "2022",
+            medium: "丙烯 | 60×80cm",
+            tags: ["动物", "丙烯", "梦幻"],
+            imageUrl: "https://picsum.photos/id/96/600/750",
+            alt: "森林与鹿"
+        },
+        {
+            id: 5,
+            title: "海边的屋子",
+            year: "2023",
+            medium: "水彩 | 31×41cm",
+            tags: ["风景", "水彩", "海岸"],
+            imageUrl: "https://picsum.photos/id/89/600/750",
+            alt: "海边建筑"
+        },
+        {
+            id: 6,
+            title: "肖像·沉思",
+            year: "2024",
+            medium: "素描 | 炭笔 38×54cm",
+            tags: ["人物", "素描", "黑白"],
+            imageUrl: "https://picsum.photos/id/20/600/750",
+            alt: "素描人物"
+        },
+        {
+            id: 7,
+            title: "春日花园",
+            year: "2024",
+            medium: "油画棒 | 42×56cm",
+            tags: ["花卉", "油画棒", "印象"],
+            imageUrl: "https://picsum.photos/id/108/600/750",
+            alt: "花园印象"
+        },
+        {
+            id: 8,
+            title: "江南雨巷",
+            year: "2023",
+            medium: "水墨 | 35×70cm",
+            tags: ["水墨", "风景", "传统"],
+            imageUrl: "https://picsum.photos/id/22/600/750",
+            alt: "水墨江南"
+        }
+    ];
+
+    // ---------- 注意 ----------
+    // 上面的图片使用了 picsum 示例图，您在实际使用时，只需将 imageUrl 换成您自己的图片链接即可。
+    // 建议：将您的绘画图片放入仓库内的 images 文件夹，例如 "images/mywork1.jpg"，然后修改上面的链接。
+    // 例如：imageUrl: "images/mountain-sunset.jpg"
+    // 图片比例无限制，画廊会自动适应（宽度100%，高度自动），保证卡片大小随图片比例变化。
+    // -------------------------
+
+    // 全局变量
+    let currentPaintings = [...paintingsData];
+    let activeTag = "全部";   // 当前选中的标签
+
+    // DOM 元素
+    const galleryContainer = document.getElementById('galleryContainer');
+    const tagFilterBar = document.getElementById('tagFilterBar');
+    const modal = document.getElementById('imageModal');
+    const modalImg = document.getElementById('modalImage');
+    const closeModalSpan = document.querySelector('.close-modal');
+
+    // ---- 辅助函数：从所有作品中提取所有出现的标签（去重）----
+    function getAllTags() {
+        const tagSet = new Set();
+        tagSet.add("全部");   // “全部” 按钮代表显示所有作品
+        paintingsData.forEach(painting => {
+            if (painting.tags && Array.isArray(painting.tags)) {
+                painting.tags.forEach(tag => tagSet.add(tag));
+            }
+        });
+        return Array.from(tagSet);
+    }
+
+    // ---- 根据当前选中的标签筛选作品 ----
+    function filterPaintingsByTag(tag) {
+        if (tag === "全部") {
+            return [...paintingsData];
+        } else {
+            return paintingsData.filter(painting => painting.tags && painting.tags.includes(tag));
+        }
+    }
+
+    // ---- 渲染标签栏按钮 ----
+    function renderTagButtons() {
+        const allTags = getAllTags();
+        tagFilterBar.innerHTML = '';
+        allTags.forEach(tag => {
+            const btn = document.createElement('button');
+            btn.textContent = tag;
+            btn.classList.add('tag-btn');
+            if (tag === activeTag) {
+                btn.classList.add('active');
+            }
+            btn.addEventListener('click', () => {
+                // 更新激活标签
+                activeTag = tag;
+                // 重新筛选数据
+                currentPaintings = filterPaintingsByTag(activeTag);
+                // 重新渲染画廊
+                renderGallery(currentPaintings);
+                // 更新按钮激活样式
+                document.querySelectorAll('.tag-btn').forEach(btnEl => {
+                    if (btnEl.textContent === activeTag) {
+                        btnEl.classList.add('active');
+                    } else {
+                        btnEl.classList.remove('active');
+                    }
+                });
+            });
+            tagFilterBar.appendChild(btn);
+        });
+    }
+
+    // ---- 渲染画廊 (作品网格，完全动态调整大小) ----
+    function renderGallery(paintingsArray) {
+        if (!galleryContainer) return;
+
+        // 清空容器，但保留可能的提示文字（无）
+        galleryContainer.innerHTML = '';
+
+        if (!paintingsArray.length) {
+            const noResultDiv = document.createElement('div');
+            noResultDiv.className = 'no-results';
+            noResultDiv.textContent = '✨ 暂时没有这个标签的作品，试试其他标签吧 ✨';
+            galleryContainer.appendChild(noResultDiv);
+            return;
+        }
+
+        // 循环创建每个绘画卡片
+        paintingsArray.forEach(painting => {
+            const card = document.createElement('div');
+            card.className = 'art-card';
+
+            // 图片包装器
+            const imgWrapper = document.createElement('div');
+            imgWrapper.className = 'image-wrapper';
+
+            const img = document.createElement('img');
+            img.src = painting.imageUrl;
+            img.alt = painting.alt || painting.title;
+            img.className = 'art-image';
+            img.loading = 'lazy';   // 懒加载优化
+
+            // 点击图片打开模态框 (大图)
+            img.addEventListener('click', (e) => {
+                e.stopPropagation();
+                modal.style.display = 'flex';
+                modalImg.src = painting.imageUrl;
+                modalImg.alt = painting.title;
+            });
+
+            imgWrapper.appendChild(img);
+
+            // 信息区域
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'art-info';
+
+            const titleEl = document.createElement('div');
+            titleEl.className = 'art-title';
+            titleEl.textContent = painting.title;
+
+            const metaEl = document.createElement('div');
+            metaEl.className = 'art-meta';
+            metaEl.textContent = `${painting.year} · ${painting.medium}`;
+
+            // 标签区域
+            const tagContainer = document.createElement('div');
+            tagContainer.className = 'tag-list';
+            if (painting.tags && painting.tags.length) {
+                painting.tags.forEach(tag => {
+                    const tagSpan = document.createElement('span');
+                    tagSpan.className = 'painting-tag';
+                    tagSpan.textContent = tag;
+                    // 点击标签也可以快速筛选（可选增强体验）
+                    tagSpan.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // 模拟点击对应标签按钮
+                        const targetBtn = Array.from(document.querySelectorAll('.tag-btn')).find(btn => btn.textContent === tag);
+                        if (targetBtn) {
+                            targetBtn.click();
+                        } else {
+                            // 如果标签不在筛选栏(其实应该都在)，手动更新
+                            activeTag = tag;
+                            currentPaintings = filterPaintingsByTag(activeTag);
+                            renderGallery(currentPaintings);
+                            // 更新激活样式
+                            document.querySelectorAll('.tag-btn').forEach(btn => {
+                                if (btn.textContent === activeTag) btn.classList.add('active');
+                                else btn.classList.remove('active');
+                            });
+                        }
+                    });
+                    tagContainer.appendChild(tagSpan);
+                });
+            }
+
+            infoDiv.appendChild(titleEl);
+            infoDiv.appendChild(metaEl);
+            infoDiv.appendChild(tagContainer);
+            card.appendChild(imgWrapper);
+            card.appendChild(infoDiv);
+            galleryContainer.appendChild(card);
+        });
+    }
+
+    // ---- 初始化页面，加载数据，建立标签，渲染画廊 ----
+    function init() {
+        // 设置初始活跃标签为"全部"
+        activeTag = "全部";
+        currentPaintings = filterPaintingsByTag(activeTag);
+        // 生成标签按钮
+        renderTagButtons();
+        // 渲染作品网格
+        renderGallery(currentPaintings);
+
+        // 模态框关闭事件
+        closeModalSpan.onclick = function() {
+            modal.style.display = "none";
+        };
+        modal.onclick = function(e) {
+            if (e.target === modal) {
+                modal.style.display = "none";
+            }
+        };
+        // ESC 关闭模态框
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "Escape" && modal.style.display === "flex") {
+                modal.style.display = "none";
+            }
+        });
+    }
+
+    // 启动页面
+    init();
+</script>
+
+<!-- 使用说明： 
+     1. 替换 paintingsData 中的 imageUrl 为你的绘画图片实际地址（推荐相对路径，如 'images/暮色.jpg'）。
+     2. 图片大小不设限，画廊会自适应，卡片比例随图片纵横比变化，保证展示完整。
+     3. 每个绘画作品可以添加多个自定义标签，点击标签可快速筛选，点击图片可放大查看。
+     4. 如需添加新作品，复制一个对象并修改标题、年份、medium、tags和图片链接即可。
+     5. 请将所有作品图片放入 images/ 文件夹并上传至 GitHub 仓库，确保路径正确。
+-->
+</body>
+</html>
